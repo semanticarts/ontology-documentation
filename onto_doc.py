@@ -5,6 +5,8 @@ from collections import defaultdict
 from itertools import chain
 import jinja2
 
+
+debug = True
 class NestedDefaultDict(defaultdict):
     def __init__(self, *args, **kwargs):
         super(NestedDefaultDict, self).__init__(NestedDefaultDict, *args, **kwargs)
@@ -13,7 +15,7 @@ class NestedDefaultDict(defaultdict):
         return repr(dict(self))
 
 
-gist = 'ontology/v11.gistCore.owl'
+gist = './ontology/2022-03-15_v11.gistCore.owl'
 
 d = defaultdict(list)
 # set up the clustering of classes in the document
@@ -21,21 +23,64 @@ d = defaultdict(list)
 d["00100-Contact"] = ["Address", "ElectronicMessageAddress", "EmailAddress", "PostalAddress", "TelephoneNumber"]
 d["00101-Contact_Predicates"] = ["hasAddress", "hasCommunicationAddress"]
 d["00200-Agreement"] = ["Account", "Agreement", "Balance", "Commitment", "ContingentObligation", "Contract","ContractTerm", "DegreeOfCommitment", "Obligation", "Offer", "Transaction" ]
+d["00201-Agreement_Predicates"] = ["hasParticipant", "hasParty", "hasGiver", "hasParty", "hasRecipient", "isTriggeredBy"]
 d["00300-Category"] = ["Category", "ControlledVocabulary", "Tag", "Taxonomy","Aspect"]
+d["00301-Category_Predicates"] = ["hasDirectSubCategory",  "hasSubCategory", "hasDirectSuperCategory", "hasSuperCategory", "isCategorizedBy", "hasNavigationalChild", "hasNavigationalParent", "hasUniqueSuperCategory", "hasUniqueNavigationalParent", "isAspectOf", "isCharacterizedAs"]
 d["00400-Content"] = ["Content", "ContentExpression", "FormattedContent", "MediaType", "Medium", "Message", "RenderedContent", "Text", "ID", "SchemaMetaData"]
+d["00401-Content_Predicates"] = ["tagText", "uniqueText", "encryptedText", "containedText", "isAbout", "isDescribedIn", "isExpressedIn", "isRenderedOn"]
 d["00500-Collection"] = ["Collection", "OrderedCollection", "OrderedMember"]
+d["00501-Collection_Predicates"] = ["sequence", "providesOrderFor", "followsDirectly", "precedesDirectly", "hasMember", "isMemberOf", "precedes"]
 d["00600-Event"] = ["Event", "ContemporaneousEvent", "ContingentEvent", "HistoricalEvent", "PhysicalEvent", "PlannedEvent", ]
-d["00700-Project"] = ["Project", "ScheduledTask", "Task", "TaskTemplate", "Template"]
-d["00800-Specification"] = ["BundledCatalogItem", "CatalogItem", "ProductCategory", "ProductSpecification", "Requirement", "Restriction", "ServiceSpecification", "Specification" ]
-d["00900-IoT"] = ["Actuator", "Controller", "ControllerType", "MessageDefinition", "PhenomenaType", "PhysicalActionType", "Sensor"]
-d["01000-Magnitude"] = ["VolumeUnit", "Magnitude","Area", "Count", "ElectricCurrent", "InformationQuantity", "LuminousIntensity", "Mass", "MolarQuantity", "Monetary", "Percentage", "ProductMagnitude", "RatioMagnitude", "Temperature", "Duration", "Extent" ]
-d["01100-System"] = [ "Component", "Equipment", "EquipmentType", "Function", "Network", "NetworkLink", "NetworkNode", "System"]
-d["01200-Organization"] = ["CountryGovernment", "GeoPoliticalRegion", "GovernmentOrganization", "Group", "Organization"]
-d["01300-Place"] = ["GeoPoint", "Building", "GeoRoute", "GeoSegment", "GeoVolume", "Landmark", "Place", "GeoRegion"]
-d["01400-Human Behavior"] = ["Person", "Behavior", "IntellectualProperty", "Intention", "Language", "Artifact", "Goal", "Permission"]
-d["01500-Time"] = ["TimeZone", "TimeZoneStandard", "TemporalRelation"]
-d["01600-Physical World"] = ["PhysicalIdentifiableItem", "PhysicalSubstance", "LivingThing"]
-d["01700-Unit"] = ["VolumeUnit", "UnitOfMeasure", "SimpleUnitOfMeasure", "ProductUnit", "AreaUnit", "CountingUnit", "CurrencyUnit", "DataSizeUnit", "ElectricalCurrentUnit", "LuminousIntensityUnit", "MoleUnit", "RatioUnit", "TemperatureUnit", "CoherentProductUnit", "CoherentRatioUnit", "CoherentUnit", "BaseUnit", "DistanceUnit" , "DurationUnit", "MassUnit"]
+d["00700-ID"] = ["ID"]
+d["00701-ID_Predicates"] = ["identifies", "isIdentifiedBy", "isAllocatedBy"]
+d["00800-Project"] = ["Project", "ScheduledTask", "Task", "TaskTemplate", "Template"]
+d["00801-Project_Predicates"] = ["hasDirectSubTask",  "hasSubTask",  "isDirectSubTaskOf", "isSubTaskOf"]
+d["00900-Specification"] = ["BundledCatalogItem", "CatalogItem", "ProductCategory", "ProductSpecification", "Requirement", "Restriction", "ServiceSpecification", "Specification" ]
+d["01000-IoT"] = ["Actuator", "Controller", "ControllerType", "MessageDefinition", "PhenomenaType", "PhysicalActionType", "Sensor"]
+d["01001-IoT_Predicates"] = ["hasViableRange", "accepts"]
+d["01100-Magnitude"] = ["VolumeUnit", "Magnitude","Area", "Count", "ElectricCurrent", "InformationQuantity", "LuminousIntensity", "Mass", "MolarQuantity", "Monetary", "Percentage", "ProductMagnitude", "RatioMagnitude", "Temperature", "Duration", "Extent" ]
+d["01101-Magnitude_Predicates"] = ["hasPrecision", "hasMagnitude", "numericValue"]
+d["01200-System"] = ["Component", "Equipment", "EquipmentType", "Function", "Network", "NetworkLink", "NetworkNode", "System"]
+d["01201-System_Predicates"] = ["contributesTo", "links", "linksFrom", "linksTo"]
+d["01300-Organization"] = ["CountryGovernment", "GeoPoliticalRegion", "GovernmentOrganization", "Group", "Organization"]
+d["01301-Organization_Predicates"] = ["governs", "isGovernedBy", "isRecognizedDirectlyBy", "isRecognizedBy", "recognizes", "hasJurisdictionOver"]
+d["01400-Place"] = ["GeoPoint", "Building", "GeoRoute", "GeoSegment", "GeoVolume", "Landmark", "Place", "GeoRegion"]
+d["01401-Place_Predicates"] = ["latitude", "longitude", "containsGeographically",  "isGeographicallyContainedIn", "isGeographicallyOccupiedBy", "occupiesGeographically", "hasPhysicalLocation",  "isGeographicallyPermanentlyOccupiedBy",  "occupiesGeographicallyPermanently", "hasAltitude", "goesToPlace", "comesFromPlace", "occursIn"]
+d["01500-Human Behavior"] = ["Person", "Behavior", "IntellectualProperty", "Intention", "Language", "Artifact", "Goal", "Permission"]
+d["01600-Date-and-Time"] = ["TimeZone", "TimeZoneStandard", "TemporalRelation"]
+d["01601-Date-and-Time_Predicates"] = ["isRecordedAt"]
+d["01700-Physical World"] = ["PhysicalIdentifiableItem", "PhysicalSubstance", "LivingThing"]
+d["01800-Unit"] = ["VolumeUnit", "UnitOfMeasure", "SimpleUnitOfMeasure", "ProductUnit", "AreaUnit", "CountingUnit", "CurrencyUnit", "DataSizeUnit", "ElectricalCurrentUnit", "LuminousIntensityUnit", "MoleUnit", "RatioUnit", "TemperatureUnit", "CoherentProductUnit", "CoherentRatioUnit", "CoherentUnit", "BaseUnit", "DistanceUnit" , "DurationUnit", "MassUnit"]
+d["01801-Unit_Predicates"] = ["baseConversionFactor", "conversionOffset", "unitSymbol",  "unitSymbolHtml", "unitSymbolUnicode", "standardConversionFactor",  "hasUnitOfMeasure", "hasDenominator", "hasBaseUnit", "hasStandardUnit", "hasMultiplicand",  "hasMultiplier", "hasNumerator"]
+d["01901-Partitive_Predicates"] = ["hasDirectPart", "hasPart", "isDirectPartOf", "hasMember", "isMemberOf", "isPartOf", "isMadeUpOf"]
+d["02001-General_Predicates"] = ["description", "name", "precedes", "conformsTo", "isConnectedTo", "isBasedOn", "isBasisFor"]
+
+remaining_notes=''' 
+ 
+Human Behavior:
+hasDeathDate, hasBiologicalParent,  hasBirthDate,hasBiologicalOffspring,produces,goesToAgent, comesFromAgent, owns,  hasGoal, isCharacterizedAs (also Category),   isAllocatedBy (also under Identifiers),  hasIncumbent,    
+ 
+IoT:
+hasViableRange, accepts (as currently defined it is for IoT, but I might also put it in [Permission, Requirement, Causation] since I suspect we will want to broaden the meaning), respondsTo,directs (but again I suspect we will broaden this so it perhaps should also go in General)
+
+ 
+Collection:
+sequence,providesOrderFor,followsDirectly,  precedesDirectly,
+hasMember,  isMemberOf (also in Partitive - can we have them in both?)
+precedes (also in General)
+ 
+Time [ change name to 'Date and Time' if possible]
+isRecordedAt,
+Add all new predicates for gist 11 - look for atDateTime and everything else in that hierarchy)
+
+ 
+General:
+description,name, precedes,   conformsTo,  isConnectedTo,isBasedOn,  isBasisFor, 
+ 
+Permission, Requirement, Causation (maybe this should just be General, but it feels like some kind of grouping)
+requires, accepts (see also above under IoT), affects,  isAffectedBy,prevents, allows,
+'''
+
 
 
 templateString = """
@@ -88,17 +133,24 @@ onto.load()
 
 
 classes = list(onto.classes())
+if debug: print(classes)
 object_properties = list(onto.object_properties())
+if debug: print(object_properties)
 data_properties = list(onto.data_properties())
+if debug: print(data_properties)
 disjoint_classes = list(onto.disjoint_classes())
+if debug: print(disjoint_classes)
 disjoint_properties = list(onto.disjoint_properties())
+if debug: print(disjoint_properties)
 annotation_properties = list(onto.annotation_properties())
+if debug: print(annotation_properties)
 general_axioms = list(onto.general_axioms())
+if debug: print(general_axioms)
 equivalent_classes = []
 for i in onto.classes():
     eq_class = i.equivalent_to
     if eq_class: equivalent_classes.append((i,eq_class))
-
+if debug: print(equivalent_classes)
 
 propertiesWithClassAsRange = defaultdict(list)
 for p in object_properties:
@@ -191,6 +243,7 @@ def getPredicateInfo(i):
 
 for k in d.keys():
     for l in d[k]:
+        print(l)
         if "_" in k:
             template_data[k][str(l)] = getPredicateInfo(l)
         else:
