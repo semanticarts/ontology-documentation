@@ -38,29 +38,6 @@ d["01600-Physical World"] = ["PhysicalIdentifiableItem", "PhysicalSubstance", "L
 d["01700-Unit"] = ["VolumeUnit", "UnitOfMeasure", "SimpleUnitOfMeasure", "ProductUnit", "AreaUnit", "CountingUnit", "CurrencyUnit", "DataSizeUnit", "ElectricalCurrentUnit", "LuminousIntensityUnit", "MoleUnit", "RatioUnit", "TemperatureUnit", "CoherentProductUnit", "CoherentRatioUnit", "CoherentUnit", "BaseUnit", "DistanceUnit" , "DurationUnit", "MassUnit"]
 
 
-
-# d["Address"] = ["Address", "ElectronicMessageAddress", "EmailAddress", "PostalAddress", "TelephoneNumber"]
-# d["Address_Predicates"] = ["hasAddress", "hasCommunicationAddress"]
-# d["Agreement"] = ["Account", "Agreement", "Balance", "Commitment", "ContingentObligation", "Contract","ContractTerm", "DegreeOfCommitment", "Obligation", "Offer", "Transaction" ]
-# d["Category"] = ["ControlledVocabulary", "Tag", "Taxonomy"]
-# d["Content"] = ["ContentExpression", "FormattedContent", "MediaType", "Medium", "Message", "RenderedContent", "Text"]
-# d["Event"] = ["ContemporaneousEvent", "ContingentEvent", "HistoricalEvent", "PhysicalEvent", "PlannedEvent", "Project", "ScheduledTask", "Task", "TaskTemplate"]
-# d["Intention"] = ["BundledCatalogItem", "CatalogItem", "Goal", "Permission", "ProductCategory", "ProductSpecification", "Requirement", "Restriction", "ServiceSpecification", "Specification" ]
-# d["IoT"] = ["Actuator", "Controller", "ControllerType", "MessageDefinition", "PhenomenaType", "PhysicalActionType", "Sensor"]
-# d["Magnitude"] = ["Count", "ElectricCurrent", "InformationQuantity", "LuminousIntensity", "Mass", "MolarQuantity", "Monetary", "Percentage", "ProductMagnitude", "RatioMagnitude", "Temperature" ]
-# d["Measure"] = ["Aspect", "OrderedCollection", "ReferenceValue"]
-# d["Network"] = ["Artifact", "Component", "Equipment", "EquipmentType", "Function", "Network", "NetworkLink", "NetworkNode", "System"]
-# d["Organization"] = ["CountryGovernment", "GeoPoliticalRegion", "GovernmentOrganization", "Group"]
-# d["Place"] = ["Building", "GeoRoute", "GeoSegment", "GeoVolume", "Landmark", "Place"]
-# d["TemporalRelation"] = ["TemporalRelation"]
-# d["Time"] = ["DateInstant", "GreenwichInstant", "HumanInstant", "LocalInstant", "SystemInstant", "TimeZone", "TimeZoneStandard"]
-# d["Top"] = ["Area", "AreaUnit", "BaseUnit", "Behavior", "Category", "Collection", "Content", "DistanceUnit", "Duration", "DurationUnit", "Event", "Extent", "GeoPoint", "GeoRegion", "ID",
-#             "IntellectualProperty", "Intention", "Language", "LivingThing", "Magnitude", "MassUnit", "Organization", "Person", "PhysicalIdentifiableItem", "PhysicalSubstance", "ProductUnit",
-#             "SchemaMetaData", "SimpleUnitOfMeasure", "Template", "TimeInstant", "UnitOfMeasure", "Volume", "VolumeUnit"]
-# d["Unit"] = ["CountingUnit", "CurrencyUnit", "DataSizeUnit", "ElectricalCurrentUnit", "LuminousIntensityUnit", "MoleUnit", "RatioUnit", "TemperatureUnit"]
-# d["UnitDim"] = ["CoherentProductUnit", "CoherentRatioUnit", "CoherentUnit"]
-
-
 templateString = """
 {% for section, classes in d.items() %}
 #  <a name="{{ section[6:] }}">{{ section[6:] }}</a>
