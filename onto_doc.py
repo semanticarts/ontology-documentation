@@ -248,7 +248,8 @@ for k in d.keys():
             template_data[k][str(l)] = getPredicateInfo(l)
         else:
             myIRI = onto.search_one(iri=gist.base_iri + l)
-            template_data[k][str(myIRI)] = getTheInfo(myIRI)
+            if(myIRI != None):
+                template_data[k][str(myIRI)] = getTheInfo(myIRI)
 
 
 
