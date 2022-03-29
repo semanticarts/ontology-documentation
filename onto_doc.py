@@ -14,8 +14,9 @@ class NestedDefaultDict(defaultdict):
     def __repr__(self):
         return repr(dict(self))
 
+gist = 'gist.owl'
+#gist = './ontology/2022-03-15_v11.gistCore.owl'
 
-gist = './ontology/2022-03-15_v11.gistCore.owl'
 
 d = defaultdict(list)
 # set up the clustering of classes in the document
@@ -131,7 +132,6 @@ xsd = onto.get_namespace("http://www.w3.org/2001/XMLSchema#")
 
 onto.load()
 
-
 classes = list(onto.classes())
 if debug: print(classes)
 object_properties = list(onto.object_properties())
@@ -161,6 +161,42 @@ for p in object_properties:
     for x in p.domain:
         [propertiesWithClassAsDomain[z.strip()].append(p) for z in str(x).split("|")]
 
+# ontology metrics
+individuals = set()
+for c in onto.classes():
+    for i in c.instances():
+        individuals.add(i)
+
+metrics = {}
+
+metrics["General"] = {}
+metrics["General"]["Classes"] = len(classes)
+metrics["General"]["Axioms"] = len(general_axioms)
+metrics["General"]["Object properties"] = len(object_properties)
+metrics["General"]["Data properties"] = len(data_properties)
+metrics["General"]["Annotation properties"] = len(annotation_properties)
+metrics["General"]["Individuals"] = len(individuals)
+
+metrics["Class Axioms"] = {}
+metrics["Class Axioms"]["Subclass of"] = list(default_world.sparql("""
+           SELECT (COUNT(?x) AS ?c)
+           { ?x rdfs:subClassOf ?s . FILTER(ISIRI(?x)). }
+            """))[0][0]
+metrics["Class Axioms"]["Equivalent class"] = len(equivalent_classes)
+metrics["Class Axioms"]["Disjoint"] = len(disjoint_classes)
+
+metrics["Property Axioms"] = {}
+metrics["Property Axioms"]["Subproperty of"] = list(default_world.sparql("""
+           SELECT (COUNT(?x) AS ?c)
+           { ?x rdfs:subPropertyOf ?s . }
+            """))[0][0]
+metrics["Property Axioms"]["Disjoint"] = len(disjoint_properties)
+
+for category, metric in metrics.items():
+    print('|{}|Count|\n|-|-|'.format(category))
+    for value, count in metric.items():
+        print('|{}|{}|'.format(value, count))
+    print('&nbsp;')
 
 def match():
     includedClasses = []
@@ -243,7 +279,7 @@ def getPredicateInfo(i):
 
 for k in d.keys():
     for l in d[k]:
-        print(l)
+        #print(l)
         if "_" in k:
             template_data[k][str(l)] = getPredicateInfo(l)
         else:
