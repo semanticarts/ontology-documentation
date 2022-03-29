@@ -243,7 +243,7 @@ def getPredicateInfo(i):
 
 for k in d.keys():
     for l in d[k]:
-        print(l)
+        if debug:  print(l)
         if "_" in k:
             template_data[k][str(l)] = getPredicateInfo(l)
         else:
