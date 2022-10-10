@@ -1,0 +1,1 @@
+pandoc -S --toc -o 2022-10-09_gist_11.1.0_constellations.epub metadata.yaml 2022-10-09_gist_11.1.0_constellations.draft.md  -M title='The Zest of gist'
