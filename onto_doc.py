@@ -215,7 +215,7 @@ def match():
 def link_up(s):
     s1 = s.replace("gist.", "gist:")
     s2 = "".join([c if c.isalnum() else "" for c in s1]).lower()
-    return f"[{s1}](#{s2})"
+    return f"[{s1}](#{s2}-identifier)"
 
 
 # #find prefLabel
