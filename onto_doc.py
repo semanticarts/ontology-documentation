@@ -1,5 +1,6 @@
 import jinja2
 from owlready2 import *
+from itertools import chain
 
 debug = False
 
@@ -16,7 +17,7 @@ gist_ontology_file = './ontology/v11.1.gistCore.owl'
 
 d = defaultdict(list)
 # set up the clustering of classes in the document
-#
+
 d["00100-Contact"] = ["Address", "ElectronicMessageAddress", "EmailAddress", "StreetAddress", "PostalAddress",
                       "TelephoneNumber"]
 d["00101-Contact_Predicates"] = ["hasAddress", "hasCommunicationAddress"]
@@ -208,8 +209,35 @@ def match():
                 missingClasses.append(c)
 
 
-#    print(includedClasses)
-#    print(missingClasses)
+    print("In the ontology:  ", includedClasses)
+    print("Not in the ontology:  ", missingClasses)
+
+
+def match_v2():
+    properties_in_template = []
+    classes_in_template = []
+    for key in d.keys():
+        if not "Predicates" in key:
+            classes_in_template.append(d[key])
+        else:
+            properties_in_template.append(d[key])
+    onto_classes = [x.name for x in list(onto.classes())]
+    onto_properties = [x.name for x in list(onto.properties())]
+    classes_in_template_set = set(list(chain.from_iterable(classes_in_template)))
+    onto_classes_set = set(onto_classes)
+    properties_in_template_set = set(list(chain.from_iterable(properties_in_template)))
+    onto_properties_set = set(onto_properties)
+    classes_in_template_only = classes_in_template_set - onto_classes_set
+    properties_in_template_only = properties_in_template_set - onto_properties_set
+    print("items in template but not in ontology")
+    print("classes:  ", classes_in_template_only)
+    print("properties:  ", properties_in_template_only)
+    classes_in_ontology_only = onto_classes_set - classes_in_template_set
+    properties_in_ontology_only = onto_properties_set - properties_in_template_set
+    print("items in ontology but not in template")
+    print("classes:  ", classes_in_ontology_only)
+    print("properties:  ", properties_in_ontology_only)
+
 
 
 def link_up(s):
@@ -278,31 +306,36 @@ def getPredicateInfo(i):
         print(e)
     return template_data_
 
+def create_documentation():
+    for k in d.keys():
+        for l in d[k]:
+            if debug:  print(l)
+            if "_" in k:
+                template_data[k][str(l)] = getPredicateInfo(l)
+            else:
+                myIRI = onto.search_one(iri=gist.base_iri + l)
+                if (myIRI != None):
+                    template_data[k][str(myIRI)] = get_the_info(myIRI)
 
-for k in d.keys():
-    for l in d[k]:
-        if debug:  print(l)
-        if "_" in k:
-            template_data[k][str(l)] = getPredicateInfo(l)
-        else:
-            myIRI = onto.search_one(iri=gist.base_iri + l)
-            if (myIRI != None):
-                template_data[k][str(myIRI)] = get_the_info(myIRI)
+    output = ''
+    for k in sorted(d.keys()):
+        toPrinter = {k: template_data[k]}
+        #    print(toPrinter)
+        t = jinja2.Template(templateString)
+        output += t.render(d=toPrinter)
+        # output1 = re.sub('(gist\.)', "gist:", output)
+    print(output)
+    # print(object_properties)
+    # print(data_properties)
 
-output = ''
-for k in sorted(d.keys()):
-    toPrinter = {k: template_data[k]}
-    #    print(toPrinter)
-    t = jinja2.Template(templateString)
-    output += t.render(d=toPrinter)
-    # output1 = re.sub('(gist\.)', "gist:", output)
-print(output)
-# print(object_properties)
-# print(data_properties)
+    # """ProductUnit
+    #  and (hasMultiplicand only
+    #     (BaseUnit or CoherentProductUnit or CoherentRatioUnit))
+    #  and (hasMultiplier only
+    #     (BaseUnit or CoherentProductUnit or CoherentRatioUnit))
+    # """
 
-# """ProductUnit
-#  and (hasMultiplicand only
-#     (BaseUnit or CoherentProductUnit or CoherentRatioUnit))
-#  and (hasMultiplier only
-#     (BaseUnit or CoherentProductUnit or CoherentRatioUnit))
-# """
+if __name__ == "__main__":
+    match_v2()
+    print("+_"*100)
+    create_documentation()
