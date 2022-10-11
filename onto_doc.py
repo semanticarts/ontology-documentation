@@ -36,17 +36,17 @@ d["00401-Content_Predicates"] = ["tagText", "uniqueText", "encryptedText", "cont
                                  "isExpressedIn", "isRenderedOn"]
 d["00500-Collection"] = ["Collection", "OrderedCollection", "OrderedMember"]
 d["00501-Collection_Predicates"] = ["sequence", "providesOrderFor", "followsDirectly", "precedesDirectly", "hasMember",
-                                    "isMemberOf", "precedes"]
+                                    "hasFirstMember", "isMemberOf", "precedes"]
 d["00600-Event"] = ["Event", "ContemporaryEvent", "ContingentEvent", "HistoricalEvent", "PhysicalEvent", "PlannedEvent"]
 d["00700-ID"] = ["ID"]
 d["00701-ID_Predicates"] = ["identifies", "isIdentifiedBy", "isAllocatedBy"]
-d["00800-Project"] = ["Project", "ScheduledTask", "Task", "TaskTemplate", "Template"]
-d["00801-Project_Predicates"] = ["hasDirectSubTask", "hasSubTask", "isDirectSubTaskOf", "isSubTaskOf", "hasGoal"]
+d["00800-Task"] = ["TaskExecution", "ProjectExecution", "ScheduledTaskExecution"]
+d["00801-Task_Predicates"] = ["hasDirectSubTask", "hasSubTask", "isDirectSubTaskOf", "isSubTaskOf"]
 d["00900-Specification"] = ["BundledCatalogItem", "CatalogItem", "ProductCategory", "ProductSpecification",
-                            "Requirement", "Restriction", "ServiceSpecification", "Specification", "ReferenceValue"]
+                            "Requirement", "Restriction", "ServiceSpecification", "Specification", "TaskTemplate", "Template", "ReferenceValue"]
 d["01000-IoT"] = ["Actuator", "Controller", "ControllerType", "MessageDefinition", "PhenomenaType",
                   "PhysicalActionType", "Sensor"]
-d["01001-IoT_Predicates"] = ["hasViableRange", "accepts"]
+d["01001-IoT_Predicates"] = ["hasViableRange", "accepts", "respondsTo"]
 d["01100-Magnitude"] = ["Volume", "VolumeUnit", "Magnitude", "Area", "Count", "ElectricCurrent", "InformationQuantity",
                         "LuminousIntensity", "Mass", "MolarQuantity", "Monetary", "Percentage", "ProductMagnitude",
                         "RatioMagnitude", "Temperature", "Duration", "Extent"]
@@ -55,9 +55,9 @@ d["01200-System"] = ["Component", "Equipment", "EquipmentType", "Function", "Net
                      "System"]
 d["01201-System_Predicates"] = ["contributesTo", "links", "linksFrom", "linksTo"]
 d["01300-Organization"] = ["CountryGovernment", "GovernmentOrganization", "SubCountryGovernment",
-                           "InterGovermentOrganization", "TreatyOrganization", "Group", "Organization"]
+                           "IntergovernmentalOrganization", "TreatyOrganization", "Organization"]
 d["01301-Organization_Predicates"] = ["governs", "isGovernedBy", "isRecognizedDirectlyBy", "isRecognizedBy",
-                                      "recognizes", "hasJurisdictionOver", "hasIncumbent"]
+                                      "recognizes", "hasIncumbent", "isUnderJurisdictionOf"]
 d["01400-Place"] = ["GeoPoint", "Building", "GeoRoute", "GeoSegment", "GeoVolume", "Landmark", "Place", "GeoRegion",
                     "GovernedGeoRegion", "CountryGeoRegion"]
 d["01401-Place_Predicates"] = ["latitude", "longitude", "containsGeographically", "isGeographicallyContainedIn",
@@ -66,15 +66,15 @@ d["01401-Place_Predicates"] = ["latitude", "longitude", "containsGeographically"
                                "hasAltitude", "goesToPlace", "comesFromPlace", "occursIn"]
 d["01500-Human Behavior"] = ["Person", "Behavior", "IntellectualProperty", "Intention", "Language", "Artifact", "Goal",
                              "Permission"]
-d["01501-Human Behavior_Predicates"] = ["hasBiologicalParent"]
+d["01501-Human Behavior_Predicates"] = ["hasBiologicalParent", "hasGoal"]
 d["01600-Date-and-Time"] = ["TimeZone", "TimeZoneStandard", "TemporalRelation"]
 d["01601-Date-and-Time_Predicates"] = ["hasOffsetToUniversal", "isRecordedAt", "atDateTime", "endDateTime",
                                        "actualEndDateTime", "actualEndDate", "deathDate", "actualEndMicrosecond",
                                        "actualEndMinute", "actualEndYear", "plannedEndDateTime", "plannedEndDate",
-                                       "plannedEndMicrosecond", "plannedEndMinute", "plannedEndYear",
+                                       "plannedEndMinute", "plannedEndYear",
                                        "startDateTime", "actualStartDateTime", "actualStartDate", "birthDate",
                                        "actualStartMicrosecond", "actualStartMinute", "actualStartYear",
-                                       "plannedStartDateTime", "plannedStartDate", "plannedStartMicrosecond",
+                                       "plannedStartDateTime", "plannedStartDate",
                                        "plannedStartMinute", "plannedStartYear", "usesTimeZoneStandard"]
 d["01700-Physical World"] = ["PhysicalIdentifiableItem", "PhysicalSubstance", "LivingThing"]
 d["01800-Unit"] = ["VolumeUnit", "UnitOfMeasure", "SimpleUnitOfMeasure", "ProductUnit", "AreaUnit", "CountingUnit",
@@ -86,35 +86,12 @@ d["01801-Unit_Predicates"] = ["conversionOffset", "conversionFactor", "unitSymbo
                               "hasStandardUnit", "hasMultiplicand", "hasMultiplier", "hasNumerator"]
 d["01901-Partitive_Predicates"] = ["hasDirectPart", "hasPart", "isDirectPartOf", "hasMember", "isMemberOf", "isPartOf",
                                    "isMadeUpOf"]
-d["02001-General_Predicates"] = ["description", "name", "precedes", "produced", "prevents", "owns", "affects", "allows",
-                                 "directs", "requires", "respondsTo", "conformsTo", "isConnectedTo", "isBasedOn",
-                                 "isBasisFor"]
+d["02001-Annotation_Predicates"] = ["rangeIncludes", "domainIncludes", "license"]
+d["02101-General Description_Predicates"] = ["description", "name"]
+d["02101-General Relationship_Predicates"] = ["precedes", "prevents", "owns", "affects", "allows",
+                                 "directs", "requires", "conformsTo", "isConnectedTo", "isBasedOn",
+                                 "isBasisFor", "follows", "produces"]
 
-remaining_notes = ''' 
-
-Human Behavior:
-hasDeathDate, hasBiologicalParent,  hasBirthDate,hasBiologicalOffspring,produces,goesToAgent, comesFromAgent, owns,  hasGoal, isCharacterizedAs (also Category),   isAllocatedBy (also under Identifiers),  hasIncumbent,    
-
-IoT:
-hasViableRange, accepts (as currently defined it is for IoT, but I might also put it in [Permission, Requirement, Causation] since I suspect we will want to broaden the meaning), respondsTo,directs (but again I suspect we will broaden this so it perhaps should also go in General)
-
-
-Collection:
-sequence,providesOrderFor,followsDirectly,  precedesDirectly,
-hasMember,  isMemberOf (also in Partitive - can we have them in both?)
-precedes (also in General)
-
-Time [ change name to 'Date and Time' if possible]
-isRecordedAt,
-Add all new predicates for gist 11 - look for atDateTime and everything else in that hierarchy)
-
-
-General:
-description,name, precedes,   conformsTo,  isConnectedTo,isBasedOn,  isBasisFor, 
-
-Permission, Requirement, Causation (maybe this should just be General, but it feels like some kind of grouping)
-requires, accepts (see also above under IoT), affects,  isAffectedBy,prevents, allows,
-'''
 
 templateString = """
 {% for section, classes in d.items() %}
@@ -336,6 +313,6 @@ def create_documentation():
     # """
 
 if __name__ == "__main__":
-    match_v2()
-    print("+_"*100)
+    # match_v2()
+    # print("+_"*100)
     create_documentation()
