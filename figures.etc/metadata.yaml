@@ -9,5 +9,5 @@ creator:
   text: Peter Winstanley & The Semantic Arts Team
 publisher:  Semantic Arts, Inc.
 rights: © 2022 Semantic Arts, Inc.
-stylesheet: epub.css
-cover-image: gist-300x213.png
+stylesheet: .\figures.etc\epub.css
+cover-image: .\figures.etc\gist-300x213.png
