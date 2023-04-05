@@ -1,6 +1,11 @@
+import sys
+
 import jinja2
 from owlready2 import *
 from itertools import chain
+import subprocess
+from zipfile import ZipFile, ZIP_DEFLATED
+from lxml import etree
 
 debug = False
 
@@ -14,6 +19,7 @@ class NestedDefaultDict(defaultdict):
 
 
 gist_ontology_file = './ontology/v11.1.gistCore.owl'
+ontologies_path = './ontology/'
 
 d = defaultdict(list)
 # set up the clustering of classes in the document
@@ -124,6 +130,7 @@ templateString = """
 
 """
 
+onto_path.append(ontologies_path)
 onto = get_ontology(gist_ontology_file)
 
 gist = onto.get_namespace("https://ontologies.semanticarts.com/gist/")
@@ -136,7 +143,8 @@ xsd = onto.get_namespace("http://www.w3.org/2001/XMLSchema#")
 
 onto.load()
 skos_file = 'http://www.w3.org/2004/02/skos/core'
-skos_onto = get_ontology(skos_file).load()
+skos_file_local = './ontology/skos.rdf'
+skos_onto = get_ontology(skos_file_local).load()
 onto.imported_ontologies.append(skos_onto)
 prefLabel = skos.prefLabel
 definition = skos.definition
@@ -283,7 +291,7 @@ def getPredicateInfo(i):
         print(e)
     return template_data_
 
-def create_documentation():
+def create_documentation(output_file=sys.stdout):
     for k in d.keys():
         for l in d[k]:
             if debug:  print(l)
@@ -297,22 +305,65 @@ def create_documentation():
     output = ''
     for k in sorted(d.keys()):
         toPrinter = {k: template_data[k]}
-        #    print(toPrinter)
         t = jinja2.Template(templateString)
         output += t.render(d=toPrinter)
-        # output1 = re.sub('(gist\.)', "gist:", output)
-    print(output)
-    # print(object_properties)
-    # print(data_properties)
+    print(output, file=output_file)
 
-    # """ProductUnit
-    #  and (hasMultiplicand only
-    #     (BaseUnit or CoherentProductUnit or CoherentRatioUnit))
-    #  and (hasMultiplier only
-    #     (BaseUnit or CoherentProductUnit or CoherentRatioUnit))
-    # """
+def run_pandoc(output_ebook, input_markdown, metadata_yaml, book_title):
+    title="title=" + book_title
+
+    #result = subprocess.check_call(["pandoc", "-S", "--toc", "-o", output_ebook, metadata_yaml, input_markdown, "-M" "title=", book_title], shell=True)
+    result = subprocess.check_call(
+        ["pandoc", "-S", "--toc", "-o", output_ebook, metadata_yaml, input_markdown, "-M", title],
+        shell=True)
+    return result
+
+
+def sort_hyperlinks(f, fout):
+    infile = ZipFile(f)
+    outfile = ZipFile(fout, "w", ZIP_DEFLATED)
+
+    # load up the locations
+    nav = infile.read("nav.xhtml")
+    xmldoc = etree.fromstring(nav)
+    dict = {}
+    for link in xmldoc.xpath('//x:a/@href', namespaces={"x":"http://www.w3.org/1999/xhtml"}):
+        split_link = link.split("#")
+        dict[split_link[1]] = split_link[0]
+    #print(dict["gistemailaddress"])
+
+    for f in infile.infolist():
+
+        if "ch0" in f.filename:
+            newfile = infile.read(f.filename)
+            for x in dict.keys():
+                newfile = str(newfile).replace("a href=\"#" + x + "-identifier", "a href=\"" + str(dict[x]) + "#" + str(x) ).replace("\\n","").replace("\\xc2\\xa0","")
+
+
+
+            outfile.writestr(f.filename, newfile)
+        else:
+            newfile = infile.read(f.filename)
+            outfile.writestr(f.filename, newfile)
+
+
+
 
 if __name__ == "__main__":
-    # match_v2()
-    # print("+_"*100)
-    create_documentation()
+    import os
+    input_markdown = r'.\output\2023-04-05_gist_11.1.0.md'
+    output_ebook = r'.\output\2023-04-05_gist_11.1.0.md.epub'
+    output_ebook_sorted_links = r'.\output\2023-04-05_gist_11.1.0.md.sorted.epub'
+    metadata_yaml = r'.\figures.etc/metadata.yaml'
+    book_title = "The Zest of gist"
+    cwd = os.getcwd()
+    os.chdir(r'c:\Users\Pedro\PycharmProjects\ontology-documentation')
+
+
+    output = open(input_markdown, 'w')
+    create_documentation(output_file=output)
+    output.close()
+    if run_pandoc(output_ebook, input_markdown, metadata_yaml, book_title) == 0:
+        sort_hyperlinks(output_ebook, output_ebook_sorted_links)
+    print("Finished")
+    os.chdir(cwd)
