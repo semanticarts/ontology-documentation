@@ -1,11 +1,15 @@
 import sys
 
 import jinja2
+import pydotplus as pydotplus
 from owlready2 import *
 from itertools import chain
 import subprocess
 from zipfile import ZipFile, ZIP_DEFLATED
 from lxml import etree
+from string import Template
+from rdflib import *
+import rdflib
 
 debug = False
 
@@ -291,6 +295,64 @@ def getPredicateInfo(i):
         print(e)
     return template_data_
 
+def get_metrics():
+    # ontology metrics
+    individuals = set()
+    for c in onto.classes():
+        for i in c.instances():
+            individuals.add(i)
+
+    metrics = {}
+    metrics_table = ''
+
+    metrics["General"] = {}
+    metrics["General"]["Classes"] = len(classes)
+    metrics["General"]["Axioms"] = len(general_axioms)
+    metrics["General"]["Object Properties"] = len(object_properties)
+    metrics["General"]["Data Properties"] = len(data_properties)
+    metrics["General"]["Annotation Properties"] = len(annotation_properties)
+    metrics["General"]["Individuals"] = len(individuals)
+
+    metrics["Class Axioms"] = {}
+    metrics["Class Axioms"]["Subclass Of"] = list(default_world.sparql("""
+               SELECT (COUNT(?x) AS ?c)
+               { ?x rdfs:subClassOf ?s . FILTER(ISIRI(?x)). }
+                """))[0][0]
+    metrics["Class Axioms"]["Equivalent Classes"] = len(equivalent_classes)
+    metrics["Class Axioms"]["Disjoint Classes"] = len(disjoint_classes)
+
+    metrics["Property Axioms"] = {}
+    metrics["Property Axioms"]["Subproperty Of"] = list(default_world.sparql("""
+               SELECT (COUNT(?x) AS ?c)
+               { ?x rdfs:subPropertyOf ?s . }
+                """))[0][0]
+    metrics["Property Axioms"]["Disjoint Properties"] = len(disjoint_properties)
+    metrics_table += '\n\n# <a id="ontology-metrics">Metrics</a>\n'
+    metrics_table += '## For The <<{}>> Namespace\n\n'.format(onto.base_iri)
+    metrics_table += "|Metric Type|Count| \n"
+    metrics_table += "|-|-| \n"
+
+    for category, metric in metrics.items():
+        metrics_table += '| **{}** ||'.format(category) + '\n'
+        for value, count in metric.items():
+            metrics_table += '|{}|{}|'.format(value, count) + '\n'
+    return metrics_table
+
+    def match():
+        includedClasses = []
+        missingClasses = []
+        for k in d.keys():
+            for c in d[k]:
+                if c: s = onto.search(iri="*" + c)
+                if s:
+                    includedClasses.append(c)
+                else:
+                    missingClasses.append(c)
+
+    #    print(includedClasses)
+    #    print(missingClasses)
+
+
 def create_documentation(output_file=sys.stdout):
     for k in d.keys():
         for l in d[k]:
@@ -307,6 +369,8 @@ def create_documentation(output_file=sys.stdout):
         toPrinter = {k: template_data[k]}
         t = jinja2.Template(templateString)
         output += t.render(d=toPrinter)
+    metrics_table = get_metrics()
+    print(metrics_table, file=output_file)
     print(output, file=output_file)
 
 def run_pandoc(output_ebook, input_markdown, metadata_yaml, book_title):
@@ -347,9 +411,7 @@ def sort_hyperlinks(f, fout):
             outfile.writestr(f.filename, newfile)
 
 
-
-
-if __name__ == "__main__":
+def test_this_out():
     import os
     input_markdown = r'.\output\2023-04-05_gist_11.1.0.md'
     output_ebook = r'.\output\2023-04-05_gist_11.1.0.md.epub'
@@ -367,3 +429,132 @@ if __name__ == "__main__":
         sort_hyperlinks(output_ebook, output_ebook_sorted_links)
     print("Finished")
     os.chdir(cwd)
+    myIRI = "<" + str(gist.PlannedEvent.iri) + ">"
+    sparql_string_template = Template("select *  where {  $myIRI ?p ?o} ")
+    #sparql_string_template_rdflib = Template("""prefix gist: <https://ontologies.semanticarts.com/gist/> select *  where { values (?s ?p) {  $myIRI  (gist:|!gist:)* } ?s (gist:|!gist:)* ?o} """)
+    sparql_string_template_rdflib_old = Template(
+        """prefix gist: <https://ontologies.semanticarts.com/gist/> 
+            select *  where {  
+                #values (?s ?p) {  $myIRI  (gist:|!gist:)* } 
+                #bind((gist:|!gist:) as ?p
+                #bind($myIRI as ?s)                
+                #?s ?p ?o .
+                $myIRI ?p ?o .
+
+                } 
+                """)
+    sparql_string_template_rdflib = Template(
+        """prefix gist: <https://ontologies.semanticarts.com/gist/> 
+            describe $myIRI
+                """)
+    print(sparql_string_template_rdflib.substitute(myIRI=myIRI))
+    graph = Graph().parse(gist_ontology_file)
+    gist = Namespace('https://ontologies.semanticarts.com/gist/')
+    xsd = Namespace('http://www.w3.org/2001/XMLSchema')
+    graph.namespace_manager.bind('gist', gist)
+    graph.namespace_manager.bind('xsd', xsd)
+    graph_res = graph.query("""DESCRIBE <https://ontologies.semanticarts.com/gist/PlannedEvent>""")
+    # def pprint_terms(terms, graph):
+    #     print(*[t.n3(graph.namespace_manager) for t in terms])
+    # results = default_world.sparql(sparql_string_template.substitute(myIRI=myIRI), error_on_undefined_entities=False)
+    # print(list(results))
+    # results_rdflib = graph.query(sparql_string_template_rdflib.substitute(myIRI=myIRI))
+    # for x in results_rdflib:
+    #     print(x)
+    #     pprint_terms(x, graph)
+    #     print("-"*40)
+    # !pip install pydotplus
+    # !pip install graphviz
+
+
+
+
+def rdf2dot_pwin(g, stream, opts={}):
+    """
+    Convert the RDF graph to DOT
+    writes the dot output to the stream
+    """
+
+    nodes = {}
+    g.bind_namespaces = "rdflib"
+
+    def node(x,g, color):
+        if x not in nodes:
+            nodes[x] = '''"{}" [color="{}"]'''.format(qname(x,g), color)
+        print(nodes[x])
+        return nodes[x]
+
+
+    def qname(x, g):
+        try:
+            q = g.compute_qname(x)
+            return q[0] + ":" + q[2]
+        except:
+            return x
+
+    def color(o):
+        if isinstance(o, (rdflib.URIRef)):
+            return "BLACK"
+        elif isinstance(o, (rdflib.BNode)):
+            return "ORANGE"
+        elif isinstance(o, (rdflib.Literal)):
+            return "BLUE"
+        else:
+            return "BLACK"
+
+    stream.write('''digraph {
+    node [shape="box", style="rounded"];
+    rankdir="LR"; ratio="auto";
+    subgraph RDF {''')
+    listMembers = []
+    statements = []
+    for s, p, o in g:
+
+        first = rdflib.URIRef("http://www.w3.org/1999/02/22-rdf-syntax-ns#first")
+        rest = rdflib.URIRef("http://www.w3.org/1999/02/22-rdf-syntax-ns#rest")
+        if p == first:
+            listMembers.append((s,p,o))
+            for s1,p1,o1 in g:
+                if s1 == s and p1 == rest:
+                    statements.append((s1,p1,o1))
+        if isinstance(s, (rdflib.URIRef,rdflib.BNode)):
+            sn = node(s,g, color(s))
+        if isinstance(o, (rdflib.URIRef, rdflib.BNode)):
+            on = node(o,g, color(o))
+        #print(s, qname(s,g))
+        opstr = ("""\t"%s" -> "%s" [ color=%s, label="%s"] ;\n""")
+        stream.write(opstr % (qname(s,g), qname(o,g), color(o), qname(p, g)))
+    print(listMembers)
+    print(statements)
+    for y in nodes.keys():
+        stream.write(nodes[y] +'\n')
+    stream.write("}\n}")
+
+
+
+
+if __name__ == "__main__":
+    import io
+
+    def visualize(g):
+        stream = io.StringIO()
+        rdf2dot_pwin(g, stream, opts={})
+        f=open('./output/myGraph.dot','w')
+        f.write(stream.getvalue())
+
+
+
+
+
+
+    g = Graph()
+    g_draw = Graph()
+    g.parse(gist_ontology_file)
+    gist = Namespace('https://ontologies.semanticarts.com/gist/')
+
+    g.namespace_manager.bind('gist', gist)
+
+    g_res = g.query('describe  <https://ontologies.semanticarts.com/gist/PlannedEvent> ')
+    for x in g_res:
+        g_draw.add(x)
+    visualize(g_draw)
