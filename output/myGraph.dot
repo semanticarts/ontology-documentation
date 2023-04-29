@@ -1,0 +1,39 @@
+digraph {
+    node [shape="box", style="rounded"];
+    rankdir="LR"; ratio="auto";
+    subgraph RDF {	"ns1:PlannedEvent" -> "Planned Event" [ label="skos:prefLabel"] ;
+	"N420c48f573914536a1dc1c898e830900" -> "rdf:nil" [ label="rdf:rest"] ;
+	"ns1:PlannedEvent" -> "An event which, at the time it is created, is to occur in the future." [ label="skos:definition"] ;
+	"Ne113d90323c5485fa0c01835da91b15c" -> "owl:Restriction" [ label="rdf:type"] ;
+	"N79486375662d4f0abff791575a9a3f48" -> "1" [ label="owl:cardinality"] ;
+	"N619b48ace048442eb522f868fe52304b" -> "ns1:Event" [ label="rdf:first"] ;
+	"Ncd319a92fa8d42fa9203eb5f46a8fa6d" -> "N79486375662d4f0abff791575a9a3f48" [ label="rdf:first"] ;
+	"N619b48ace048442eb522f868fe52304b" -> "Ncd319a92fa8d42fa9203eb5f46a8fa6d" [ label="rdf:rest"] ;
+	"Ncd319a92fa8d42fa9203eb5f46a8fa6d" -> "N420c48f573914536a1dc1c898e830900" [ label="rdf:rest"] ;
+	"N79486375662d4f0abff791575a9a3f48" -> "owl:Restriction" [ label="rdf:type"] ;
+	"Ne113d90323c5485fa0c01835da91b15c" -> "ns1:plannedStartDateTime" [ label="owl:onProperty"] ;
+	"N79486375662d4f0abff791575a9a3f48" -> "ns1:plannedEndDateTime" [ label="owl:onProperty"] ;
+	"N420c48f573914536a1dc1c898e830900" -> "Ne113d90323c5485fa0c01835da91b15c" [ label="rdf:first"] ;
+	"ns1:PlannedEvent" -> "owl:Class" [ label="rdf:type"] ;
+	"ns1:PlannedEvent" -> "N7c17678aa6034bf28c2ebb6a3f8d0c93" [ label="owl:equivalentClass"] ;
+	"Ne113d90323c5485fa0c01835da91b15c" -> "1" [ label="owl:cardinality"] ;
+	"N7c17678aa6034bf28c2ebb6a3f8d0c93" -> "owl:Class" [ label="rdf:type"] ;
+	"N7c17678aa6034bf28c2ebb6a3f8d0c93" -> "N619b48ace048442eb522f868fe52304b" [ label="owl:intersectionOf"] ;
+"ns1:PlannedEvent" [color="BLACK"]
+"Planned Event" [color="BLUE"]
+"N420c48f573914536a1dc1c898e830900" [color="ORANGE"]
+"rdf:nil" [color="BLACK"]
+"An event which, at the time it is created, is to occur in the future." [color="BLUE"]
+"Ne113d90323c5485fa0c01835da91b15c" [color="ORANGE"]
+"owl:Restriction" [color="BLACK"]
+"N79486375662d4f0abff791575a9a3f48" [color="ORANGE"]
+"1" [color="BLUE"]
+"N619b48ace048442eb522f868fe52304b" [color="ORANGE"]
+"ns1:Event" [color="BLACK"]
+"Ncd319a92fa8d42fa9203eb5f46a8fa6d" [color="ORANGE"]
+"ns1:plannedStartDateTime" [color="BLACK"]
+"ns1:plannedEndDateTime" [color="BLACK"]
+"owl:Class" [color="BLACK"]
+"N7c17678aa6034bf28c2ebb6a3f8d0c93" [color="ORANGE"]
+}
+}
