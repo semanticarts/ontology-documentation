@@ -133,3 +133,5 @@ dmypy.json
 
 *.dot
 *.png
+*.md
+*.epub

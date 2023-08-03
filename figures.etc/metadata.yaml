@@ -6,8 +6,9 @@ title:
   text: Just scratching the surface
 creator:
 - role: author
-  text: Peter Winstanley & The Semantic Arts Team
+  text: The Semantic Arts Team
 publisher:  Semantic Arts, Inc.
-rights: © 2022 Semantic Arts, Inc.
-stylesheet: .\figures.etc\epub.css
-cover-image: .\figures.etc\gist-300x213.png
+rights: © 2023 Semantic Arts, Inc. & for cover page image - Dvortygirl, CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0>, via Wikimedia Commons
+stylesheet: C:/Users/Pedro/PycharmProjects/ontology-documentation/figures.etc/epub.css
+cover-image: C:/Users/Pedro/PycharmProjects/ontology-documentation/figures.etc/Zesting_an_orange.v2.png
+...
