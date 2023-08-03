@@ -13,6 +13,7 @@ import rdflib
 
 from rdflib import Graph, URIRef, BNode, Literal, Namespace
 from rdflib.term import Node
+
 from rdflib.namespace import RDF, RDFS
 import argparse
 from typing import Dict, List, Tuple
@@ -20,6 +21,7 @@ from pathlib import Path
 from io import StringIO
 from textwrap import wrap
 import io
+
 
 debug = True
 
@@ -162,6 +164,161 @@ def create_class_image(g, root, output, exclude_types=True):
     g_draw = Graph()
     # g.parse(rdf)
 
+debug = False
+
+
+###########START OF CLASS DIAGRAMS
+
+Triple = Tuple[Node, Node, Node]
+Triples = List[Triple]
+class_images_path = r"./class_images/"
+
+def listNode(statements: Triples) -> bool:
+    return len(statements) == 2 and all(s[1] in [RDF.first, RDF.rest] for s in statements)
+
+
+def color(o):
+    if isinstance(o, (URIRef)):
+        return "BLACK"
+    if isinstance(o, (BNode)):
+        return "ORANGE"
+    if isinstance(o, (Literal)):
+        return "BLUE"
+    return "BLACK"
+
+def qname(x: URIRef, g: Graph) -> str:
+    try:
+        q = g.compute_qname(x, generate=False)
+        return q[0] + ":" + q[2]
+    except:
+        return str(x)
+
+
+def declareTerm(g: Graph, declared: Dict[URIRef, str], term: URIRef) -> Tuple[str, str]:
+  if term in declared:
+    return '', declared[term]
+  declaration = ''
+  ref = str(term)
+  attributes = []
+  if isinstance(term, Literal):
+    ref = "\n".join(wrap(str(term), width=50))
+    attributes.append('color="blue"')
+  elif isinstance(term, BNode):
+    attributes.extend(('color="orange"', 'shape="point"', 'width="0.2"'))
+  else:
+    ref = qname(term, g)
+
+  declared[term] = ref
+  declaration = f'   "{ref}" [{";".join(attributes)}];\n'
+
+  return [declaration, ref]
+
+
+
+def renderList(g: Graph,
+                declared: dict,
+                head: URIRef,
+                statements: Triples) -> Tuple[str, List[URIRef]]:
+  listMembers = []
+  while True:
+    headNode = next(s[2] for s in statements if s[1] == RDF.first)
+    listMembers.append(headNode);
+    nextNode = next(s[2] for s in statements if s[1] == RDF.rest)
+    if (nextNode == RDF.nil):
+      break
+    statements = list(g.triples((nextNode, None, None)))
+
+  [dotText, listRef] = declareTerm(g, declared, head)
+  memberRefs = []
+  for member in listMembers:
+    memberText, memberRef = declareTerm(g, declared, member)
+    dotText += memberText
+    memberRefs.append(memberRef)
+
+  attributes = [
+    'shape=record',
+    f'label="{"|".join(f"<p{m}>" for m in range(len(memberRefs)))}"'
+  ]
+  dotText += f'   "{listRef}" [{",".join(attributes)}];\n ';
+  dotText += "\n".join(f'"{listRef}":p{i} -> "{m}" ;' for i, m in enumerate(memberRefs))
+
+  return dotText, listMembers
+
+
+def createDot(g: Graph, stream: StringIO, root: URIRef, **kwargs) -> str:
+  subjectsToAdd = [root]
+  excludeTypes = kwargs.get('excludeTypes', False)
+  declared = {}
+  allStatements = []
+  seen = set()
+  rdfGraph = ''
+  while subjectsToAdd:
+    ss = subjectsToAdd.pop(0)
+    seen.add(ss)
+    statements = list(g.triples((ss, None, None)))
+    if listNode(statements):
+      [text, listMembers] = renderList(g, declared, ss, statements)
+      rdfGraph += text
+      subjectsToAdd.extend(ls for ls in listMembers if isinstance(ls, BNode) and not ls in seen)
+    else:
+      allStatements.extend(statements)
+      subjectsToAdd.extend(s[2] for s in statements if isinstance(s[2], BNode) and not s[2] in seen)
+
+  for triple in allStatements:
+    [text, subjectRef] = declareTerm(g, declared, triple[0]);
+    rdfGraph += text
+    if not (excludeTypes and triple[1] == RDF.type):
+      [text, objectRef] = declareTerm(g, declared, triple[2])
+      rdfGraph += text;
+      rdfGraph += f'  "{subjectRef}" -> "{objectRef}"  [label="{qname(triple[1], g)}"];\n '
+
+  stream.write(f"""digraph {{
+    node [shape="box", style="rounded"];
+    rankdir="LR"; ratio="auto";
+    subgraph RDF {{
+      {rdfGraph}
+    }}
+  }}""")
+
+
+
+# def visualize(g, root, output, **kwargs):
+#       stream = io.StringIO()
+#       createDot(g, stream, root, **kwargs)
+#       output.write(stream.getvalue())
+
+def create_class_image(g, root, output, exclude_types=True):
+    import io
+
+    def visualize(g, root, output_file, output_filename, **kwargs):
+        stream = io.StringIO()
+        createDot(g, stream, root, **kwargs)
+        output_file.write(stream.getvalue())
+        output_file.flush()
+        output_file.close()
+        print(" ".join(["dot", "-T", "png", output_filename + ".dot",  "-o", output_filename + ".png"]))
+        result = subprocess.check_call(["dot", "-T", "png", output_filename + ".dot",  "-o", output_filename + ".png"], shell=True)
+        print(result)
+
+    # g = Graph()
+    g_draw = Graph()
+    # g.parse(rdf)
+    gist = Namespace('https://ontologies.semanticarts.com/gist/')
+
+    g.namespace_manager.bind('gist', gist)
+
+    # https://ontologies.semanticarts.com/gist/PlannedEvent
+    g_res = g.query(f'describe  <{root}> ')
+    for t in g_res:
+        g_draw.add(t)
+    for ns, ns_uri in g.namespace_manager.namespaces():
+        g_draw.namespace_manager.bind(ns, ns_uri)
+    visualize(g_draw, URIRef(root),
+      #      output if output else open(Path(rdf.name).with_suffix('.dot'), 'w'),
+            open(Path(output).with_suffix('.dot'), 'w'),output,
+            excludeTypes=exclude_types)
+
+  ###########END OF CLASS DIAGRAMS
 
     # https://ontologies.semanticarts.com/gist/PlannedEvent
     g_res = g.query(f'describe  <{root}> ')
@@ -290,10 +447,15 @@ templateString = """
 ## <a id="{{ itm.class|replace(".","")|replace("_","")|replace(":","")|lower }}-identifier">{{ itm.class|replace("gist.","gist:") }}</a>
 {% endif %}
 
+
 {% set myfile =  './class_images/' + itm.class.replace("gist.","").replace("gist:","") + '.png' %}
 {% if path_exists(myfile) %}
 ![](./class_images/{{itm.class|replace("gist.","")|replace("gist:","")}}.png)
 {% endif %}
+=======
+![{{itm.class|replace("gist.","")|replace("gist:","")}}](./class_images/{{itm.class|replace("gist.","")|replace("gist:","")}}.png)
+
+
 {% if itm.pref_label %}**Preferred Label** {{ itm.pref_label }}{% endif %}
 
 {% if itm.definition %}**Definition** {{ itm.definition }}{% endif %}
@@ -342,6 +504,7 @@ scopeNote = skos.scopeNote
 
 classes = list(onto.classes())
 graph = default_world.as_rdflib_graph()
+
 print(list(graph.namespace_manager.namespaces()))
 print(len(graph))
 for x in classes:
@@ -350,7 +513,9 @@ for x in classes:
     output = open(Path(output_filename).with_suffix('.dot'), 'w', encoding='utf-8')
     print(output_filename, root)
     create_class_image(graph, root, output_filename)
+
 if debug: print("classes:  ", classes)
+
 object_properties = list(onto.object_properties())
 if debug: print("object_properties:   ", object_properties)
 data_properties = list(onto.data_properties())
@@ -755,11 +920,13 @@ def sort_hyperlinks(f, fout):
 
 def test_this_out():
     import os
+
     input_markdown = r'.\output\2023-08-03_gist_12.0.0.md'
     output_ebook = r'.\output\2023-08-03_gist_12.0.0.md.epub'
     output_ebook_sorted_links = r'.\output\2023-08-03_gist_12.0.0.md.sorted.epub'
     metadata_yaml = r'C:/Users/Pedro/PycharmProjects/ontology-documentation/figures.etc/metadata.yaml'
     css = r'C:/Users/Pedro/PycharmProjects/ontology-documentation/figures.etc/epub.css'
+
     book_title = "The Zest of gist"
     cwd = os.getcwd()
     os.chdir(r'c:\Users\Pedro\PycharmProjects\ontology-documentation')
