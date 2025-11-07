@@ -328,7 +328,7 @@ def create_class_image(g, root, output, exclude_types=True):
         g_draw.namespace_manager.bind(ns, ns_uri)
     visualize(g_draw, URIRef(root),
       #      output if output else open(Path(rdf.name).with_suffix('.dot'), 'w'),
-            open(Path(output).with_suffix('.dot'), 'w'),output,
+            open(Path(output).with_suffix('.dot'), 'w', encoding='utf-8'),output,
             excludeTypes=exclude_types)
 
   ###########END OF CLASS DIAGRAMS
@@ -350,64 +350,64 @@ class NestedDefaultDict(defaultdict):
         return repr(dict(self))
 
 
-gist_ontology_file = './ontology/gistCore12.0.0.rdf'
+gist_ontology_file = './ontology/gistCore14.0.0.rdf'
 ontologies_path = './ontology/'
+
+PREFACE = open(f'C:\\Users\\Pedro\\PycharmProjects\\ontology-documentation\\imported_pages\\Preface.md', 'r', encoding='utf-8').read()
+RELEASE_NOTES = open(f'C:\\Users\\Pedro\\PycharmProjects\\ontology-documentation\\imported_pages\\ReleaseNotes.md', 'r', encoding='utf-8').read()
+
+
+
 
 d = defaultdict(list)
 # set up the clustering of classes in the document
 
-d["00090-Metadata"] = ["ControlledVocabulary", "Taxonomy", "Tag", "SchemaMetaData" ]
-d["00091-Metadata_Predicates"] = ["tagText", "isSupersededBy"]
-d["00100-Contact"] = ["Address", "ElectronicMessageAddress", "EmailAddress", "StreetAddress", "PostalAddress",
-                      "TelephoneNumber"]
-d["00101-Contact_Predicates"] = ["hasAddress", "hasCommunicationAddress"]
-d["00200-Agreement"] = ["Account", "Agreement", "Balance", "Commitment", "ContingentObligation", "Contract",
-                        "ContractTerm", "DegreeOfCommitment", "Obligation", "Offer", "Transaction"]
-d["00201-Agreement_Predicates"] = ["hasParticipant", "hasParty", "hasGiver", "hasRecipient", "isTriggeredBy",
-                                   "comesFromAgent", "goesToAgent", "isAffectedBy", "isUnderJurisdictionOf"]
-d["00300-Category"] = ["Category", "Aspect"]
-d["00301-Category_Predicates"] = ["hasDirectSuperCategory",
-                                  "hasSuperCategory", "isCategorizedBy",
-                                  "hasNavigationalParent", "hasUniqueSuperCategory", "hasUniqueNavigationalParent",
-                                  "isAspectOf", "isCharacterizedAs"]
+d["00090-Metadata"] = ["ControlledVocabulary", "Tag", "SchemaMetaData" ]
+d["00091-Metadata_Predicates"] = ["isSupersededBy"]
+d["00100-Address"] = ["Address", "AddressUsageType", "ElectronicAddressType", "ElectronicAddress", "PhysicalAddress",  "PhysicalAddressType"]
+d["00101-Address_Predicates"] = ["hasAddress", "refersTo"]
+d["00200-Agreement"] = ["Account", "Agreement", "Commitment", "ContingentObligation", "Contract",
+                        "ContractTerm", "DegreeOfCommitment", "Offer", "Transaction"]
+d["00201-Agreement_Predicates"] = ["hasParticipant", "hasParty", "hasGiver", "hasRecipient", "offersToProvide", "offersToReceive", "owns",
+                                   "comesFromAgent", "goesToAgent", "isUnderJurisdictionOf"]
+d["00300-Category"] = ["Category"]
+d["00301-Category_Predicates"] = ["isCategorizedBy", "hasBroader","hasDirectBroader", "hasUniqueBroader", "hasNavigationalParent",
+                                  "hasUniqueNavigationalParent"]
+d["00351-Causation_Predicates"] = ["isAffectedBy","isProducedBy","isTriggeredBy"]
 d["00400-Content"] = ["Content", "ContentExpression", "FormattedContent", "GeneralMediaType", "MediaType", "Medium",
                       "Message", "RenderedContent", "Text", "ID"]
 d["00401-Content_Predicates"] = ["uniqueText", "encryptedText", "containedText", "isAbout",
                                  "isExpressedIn", "isRenderedOn"]
-d["00500-Collection"] = ["Collection", "OrderedCollection", "OrderedMember"]
-d["00501-Collection_Predicates"] = ["sequence", "providesOrderFor", "precedesDirectly", "hasMember",
-                                    "hasFirstMember", "precedes"]
-d["00600-Event"] = ["Event", "ContemporaryEvent", "ContingentEvent", "HistoricalEvent", "PhysicalEvent", "ScheduledEvent"]
+d["00500-Collection"] = ["Composite", "Collection", "OrderedCollection", "OrderedMember"]
+d["00501-Collection_Predicates"] = ["isMemberOf", "isFirstMemberOf",  "sequence", "providesOrderFor", "precedesDirectly", "precedes"]
+d["00600-Event"] = ["Event", "EventSpecification", "ContemporaryEvent", "ContingentEvent", "Determination", "HistoricalEvent", "PhysicalEvent", "ScheduledEvent"]
+d["00601-Event_Predicates"] = ["isTriggeredBy"]
 d["00700-ID"] = ["ID"]
-d["00701-ID_Predicates"] = ["isIdentifiedBy", "isAllocatedBy"]
-d["00800-Task"] = ["Task", "Project", "ScheduledTask"]
+d["00701-ID_Predicates"] = ["isIdentifiedBy", "isAllocatedBy", "idText"]
+d["00800-Task"] = ["Assignment","Task", "Project", "ScheduledTask"]
+d["00801-Task_Predicates"] = ["isAssignmentOf", "isAssignmentTo"]
+d["00850-Intention"] = ["Permission", "Requirement", "Restriction"]
+d["00851-Intention_Predicates"] = ["hasGoal", "prevents", "allows", "requires"]
 d["00900-Specification"] = ["BundledCatalogItem", "CatalogItem", "ProductCategory", "ProductSpecification",
                             "Requirement", "Restriction", "ServiceSpecification", "Specification", "TaskTemplate", "Template", "ReferenceValue"]
-d["01000-IoT"] = ["Actuator", "Controller", "ControllerType", "MessageDefinition", "PhenomenaType",
-                  "PhysicalActionType", "Sensor"]
-d["01001-IoT_Predicates"] = ["hasViableRange", "accepts", "respondsTo"]
-d["01100-Magnitude"] = ["Volume", "Magnitude", "Area", "Count", "ElectricCurrent", "InformationQuantity",
-                        "LuminousIntensity", "Mass", "MolarQuantity", "Monetary",  "ProductMagnitude",
-                        "RatioMagnitude", "Temperature", "Duration", "Extent"]
-d["01101-Magnitude_Predicates"] = ["hasPrecision", "hasMagnitude", "numericValue"]
+d["00901-Specification_Predicates"] = ["conformsTo", "isBasedOn"]
+d["01100-Magnitude"] = ["Magnitude","Aspect", "Discipline"]
+d["01101-Magnitude_Predicates"] = ["hasMagnitude", "hasAccuracy", "hasAspect", "numericValue", "hasSubtrahend", "hasAddend"]
 d["01200-System"] = ["Component", "Equipment", "EquipmentType", "Function", "Network", "NetworkLink", "NetworkNode",
                      "System"]
-d["01201-System_Predicates"] = ["contributesTo", "links", "linksFrom", "linksTo", "hasIncumbent"]
+d["01201-System_Predicates"] = ["contributesTo", "links", "linksFrom", "linksTo", "hasIncumbent","isPartOf", "isDirectPartOf", "hasGoal"]
 d["01300-Government"] = ["CountryGovernment", "GovernmentOrganization", "SubCountryGovernment",
                            "IntergovernmentalOrganization"]
-d["01301-Government_Predicates"] = ["isGovernedBy", "isRecognizedDirectlyBy", "isRecognizedBy",
+d["01301-Government_Predicates"] = ["isGovernedBy", "isRecognizedBy",
                                       "isUnderJurisdictionOf"]
-d["01400-Place"] = ["GeoPoint", "Building", "GeoRoute", "GeoSegment", "GeoVolume", "Landmark", "Place", "GeoRegion",
+d["01400-GeoSpatial"] = ["GeoLocation","GeoPoint", "Building", "GeoRoute", "GeoVolume", "Landmark", "GeoRegion",
                     "GovernedGeoRegion", "CountryGeoRegion"]
-d["01401-Place_Predicates"] = ["latitude", "longitude","isGeographicallyContainedIn",
-                                "occupiesGeographically", "hasPhysicalLocation",
-                                "occupiesGeographicallyPermanently",
-                               "hasAltitude", "goesToPlace", "comesFromPlace", "occursIn"]
-d["01500-Human Behavior"] = ["Person", "Organization", "Behavior", "IntellectualProperty", "Intention", "Language", "Artifact", "Goal",
-                             "Permission"]
-d["01501-Human Behavior_Predicates"] = ["hasBiologicalParent", "hasGoal"]
-d["01600-Date and Time"] = ["TemporalRelation", "TimeInterval"]
-d["01601-Date and Time_Predicates"] = ["isRecordedAt", "atDateTime", "endDateTime",
+d["01401-GeoSpatial_Predicates"] = ["latitude", "longitude", "hasPhysicalLocation", "isGeoContainedIn",
+                                "goesToPlace", "comesFromPlace", "occursIn"]
+d["01500-Human_Behavior"] = ["Person", "Organization", "Behavior", "IntellectualProperty", "KnowledgeConcept", "Intention", "Language", "Permission"]
+d["01501-Human_Behavior_Predicates"] = ["hasBiologicalParent", "hasGoal", "isMemberOf"]
+d["01600-Temporal"] = ["TemporalRelation", "TimeInterval"]
+d["01601-Temporal_Predicates"] = ["isRecordedAt", "atDateTime", "endDateTime",
                                        "actualEndDateTime", "actualEndDate", "deathDate", "actualEndMicrosecond",
                                        "actualEndMinute", "actualEndYear", "plannedEndDateTime", "plannedEndDate",
                                        "plannedEndMinute", "plannedEndYear",
@@ -415,21 +415,20 @@ d["01601-Date and Time_Predicates"] = ["isRecordedAt", "atDateTime", "endDateTim
                                        "actualStartMicrosecond", "actualStartMinute", "actualStartYear",
                                        "plannedStartDateTime", "plannedStartDate",
                                        "plannedStartMinute", "plannedStartYear"]
-d["01700-Physical World"] = ["PhysicalIdentifiableItem", "PhysicalSubstance", "LivingThing"]
-d["01800-Unit"] = ["VolumeUnit", "UnitOfMeasure", "SimpleUnitOfMeasure", "ProductUnit", "AreaUnit", "CountingUnit",
-                   "CurrencyUnit", "CurrencyPerDurationUnit", "MonetaryPerDuration", "DataSizeUnit", "ElectricalCurrentUnit", "LuminousIntensityUnit", "MoleUnit",
-                   "RatioUnit", "TemperatureUnit", "CoherentProductUnit", "CoherentRatioUnit", "CoherentUnit",
-                   "BaseUnit", "DistanceUnit", "DurationUnit", "MassUnit"]
-d["01801-Unit_Predicates"] = ["conversionOffset", "conversionFactor", "unitSymbol", "unitSymbolHtml",
-                              "unitSymbolUnicode", "hasUnitOfMeasure", "hasDenominator", "hasBaseUnit",
-                              "hasStandardUnit", "hasMultiplicand", "hasMultiplier", "hasNumerator"]
-d["01901-Partitive_Predicates"] = ["hasDirectPart", "hasPart", "hasMember",
-                                   "isMadeUpOf"]
-d["02001-Annotation_Predicates"] = ["rangeIncludes", "domainIncludes", "license"]
-d["02101-General Description_Predicates"] = ["description", "name"]
-d["02101-General Relationship_Predicates"] = ["precedes", "prevents", "owns",  "allows",
-                                 "directs", "requires", "conformsTo", "isConnectedTo", "isBasedOn",
-                                 "produces"]
+d["01700-Physical World"] = ["PhysicalIdentifiableItem", "PhysicalSubstance", "PhysicalActionType", "LivingThing"]
+d["01800-Unit"] = ["UnitOfMeasure", "UnitGroup", "Discipline"]
+d["01801-Unit_Predicates"] = ["hasUnitGroup", "conversionOffset", "conversionFactor", "symbol", "hasDivisor",
+                              "hasUnitOfMeasure", "hasMultiplier",
+                              "exponentOfKelvin", "exponentOfCandela", "exponentOfMeter", "exponentOfBit",
+                              "exponentOfUSDollar", "exponentOfSecond",  "exponentOfOther", "exponentOfRadian","exponentOfSteradian",
+                              "exponentOfNumber", "exponentOfAmpere", "exponentOfMole", "exponentOfKilogram"]
+
+d["01901-Partitive_Predicates"] = ["isMadeUpOf", "isPartOf", "isDirectPartOf"]
+d["02001-Annotation_Predicates"] = ["rangeIncludes", "domainIncludes", "license", "isSupersededBy"]
+d["02101-General_Description_Predicates"] = ["description", "name"]
+d["02101-General_Relationship_Predicates"] = ["isAffectedBy", "isBasedOn",
+                                 "isConnectedTo",
+                                 "isProducedBy" ]
 
 
 templateString = """
@@ -526,8 +525,8 @@ disjoint_properties = list(onto.disjoint_properties())
 if debug: print("disjoint_properties:    ", disjoint_properties)
 annotation_properties = list(onto.annotation_properties())
 if debug: print("annotation_properties:    ", annotation_properties)
-general_axioms = list(onto.general_axioms())
-if debug: print("general_axioms:    ", general_axioms)
+general_class_axioms = list(onto.general_class_axioms())
+if debug: print("general_class_axioms:    ", general_class_axioms)
 equivalent_classes = []
 for i in onto.classes():
     eq_class = i.equivalent_to
@@ -800,7 +799,7 @@ def get_metrics():
 
     metrics["General"] = {}
     metrics["General"]["Classes"] = len(classes)
-    metrics["General"]["Axioms"] = len(general_axioms)
+    metrics["General"]["General Class Axioms"] = len(general_class_axioms)
     metrics["General"]["Object Properties"] = len(object_properties)
     metrics["General"]["Data Properties"] = len(data_properties)
     metrics["General"]["Annotation Properties"] = len(annotation_properties)
@@ -862,6 +861,7 @@ def create_documentation(output_file=sys.stdout):
                     template_data[k][str(myIRI)] = get_the_info(myIRI)
 
     output = ''
+    print(PREFACE, file=output_file)
     for k in sorted(d.keys()):
         toPrinter = {k: template_data[k]}
         t = jinja2.Template(templateString)
@@ -872,6 +872,7 @@ def create_documentation(output_file=sys.stdout):
     print(imports_table, file=output_file)
     print(metrics_table, file=output_file)
     print(output, file=output_file)
+    print(RELEASE_NOTES, file=output_file)
 
 def run_pandoc(output_ebook, input_markdown, metadata_yaml, book_title):
     title="title=" + book_title
@@ -920,19 +921,17 @@ def sort_hyperlinks(f, fout):
 
 def test_this_out():
     import os
-
-    input_markdown = r'.\output\2023-08-03_gist_12.0.0.md'
-    output_ebook = r'.\output\2023-08-03_gist_12.0.0.md.epub'
-    output_ebook_sorted_links = r'.\output\2023-08-03_gist_12.0.0.md.sorted.epub'
+    input_markdown = r'.\output\2025-11-07_gist_14.0.0.md'
+    output_ebook = r'.\output\2025-11-07_gist_14.0.0.md.epub'
+    output_ebook_sorted_links = r'.\output\2025-11-07_gist_14.0.0.md.sorted.epub'
     metadata_yaml = r'C:/Users/Pedro/PycharmProjects/ontology-documentation/figures.etc/metadata.yaml'
     css = r'C:/Users/Pedro/PycharmProjects/ontology-documentation/figures.etc/epub.css'
-
-    book_title = "The Zest of gist"
+    book_title = "The Zest of gist. v14.0.0"
     cwd = os.getcwd()
     os.chdir(r'c:\Users\Pedro\PycharmProjects\ontology-documentation')
 
 
-    output = open(input_markdown, 'w')
+    output = open(input_markdown, 'w', encoding='utf-8')
     create_documentation(output_file=output)
     output.close()
     if run_pandoc(output_ebook, input_markdown, metadata_yaml, book_title) == 0:
